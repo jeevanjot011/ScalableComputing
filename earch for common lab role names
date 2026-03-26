@@ -1,0 +1,27 @@
+----------------------------------------------------------------------
+|                              ListRoles                             |
++--------------------------------------------------------------------+
+|  [1m[34mAWSServiceRoleForAutoScaling[0m                                      |
+|  [1m[34mAWSServiceRoleForAWSCloud9[0m                                        |
+|  [1m[34mAWSServiceRoleForCloudWatchEvents[0m                                 |
+|  [1m[34mAWSServiceRoleForElastiCache[0m                                      |
+|  [1m[34mAWSServiceRoleForElasticLoadBalancing[0m                             |
+|  [1m[34mAWSServiceRoleForOrganizations[0m                                    |
+|  [1m[34mAWSServiceRoleForRDS[0m                                              |
+|  [1m[34mAWSServiceRoleForSupport[0m                                          |
+|  [1m[34mAWSServiceRoleForTrustedAdvisor[0m                                   |
+|  [1m[34mc198358a5077262l14030749t1w183907-LabEksClusterRole-CpsVY1TV2upA[0m  |
+|  [1m[34mc198358a5077262l14030749t1w183907372-LabEksNodeRole-4jt9VLLFctqY[0m  |
+|  [1m[34mc198358a5077262l14030749t1w1839073723-LambdaSLRRole-M2RtkOLEdZO0[0m  |
+|  [1m[34mEMR_AutoScaling_DefaultRole[0m                                       |
+|  [1m[34mEMR_DefaultRole[0m                                                   |
+|  [1m[34mEMR_EC2_DefaultRole[0m                                               |
+|  [1m[34mEMR_Notebooks_DefaultRole[0m                                         |
+|  [1m[34mLabRole[0m                                                           |
+|  [1m[34mmyRedshiftRole[0m                                                    |
+|  [1m[34mRedshiftRole[0m                                                      |
+|  [1m[34mRoleForLambdaModLabRole[0m                                           |
+|  [1m[34mvocareum[0m                                                          |
+|  [1m[34mvocareum-eventbridge[0m                                              |
+|  [1m[34mvoclabs[0m                                                           |
++--------------------------------------------------------------------+

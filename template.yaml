@@ -1,0 +1,90 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Financial Calculators API - Phase 2 with SQS, SNS, DynamoDB
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    Runtime: python3.9
+    Environment:
+      Variables:
+        TABLE_NAME: ScalableG1
+        SNS_TOPIC_ARN: !Ref LoanAlertsTopicV2
+        SQS_QUEUE_URL: !Ref CalculationQueueV2
+
+Resources:
+  # ==========================================
+  # API GATEWAY (NEW UNIQUE NAME)
+  # ==========================================
+  LoanApiV2:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: Loan Calculator API Phase 2
+      StageName: prod
+      Cors:
+        AllowMethods: "'POST,OPTIONS,GET'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+        AllowOrigin: "'*'"
+
+  # ==========================================
+  # LAMBDA FUNCTION (NEW UNIQUE NAME)
+  # ==========================================
+  LoanFunctionV2:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: loan-calculator-phase2
+      Description: "Loan calculator with DynamoDB, SNS, SQS integration"
+      CodeUri: loan_service/
+      Handler: app.lambda_handler
+      Role: arn:aws:iam::183907372384:role/LabRole
+      Events:
+        LoanCalculateV2:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LoanApiV2
+            Path: /loan/calculate
+            Method: post
+        LoanHealthV2:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LoanApiV2
+            Path: /loan/health
+            Method: get
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: ScalableG1
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt LoanAlertsTopicV2.TopicName
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt CalculationQueueV2.QueueName
+
+  # ==========================================
+  # SNS TOPIC (NEW UNIQUE NAME)
+  # ==========================================
+  LoanAlertsTopicV2:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: scalable-loan-alerts-phase2
+
+  # ==========================================
+  # SQS QUEUE (NEW UNIQUE NAME)
+  # ==========================================
+  CalculationQueueV2:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: scalableG1-phase2
+      VisibilityTimeout: 60
+
+Outputs:
+  LoanApiUrl:
+    Description: Loan API Endpoint Phase 2
+    Value: !Sub "https://${LoanApiV2}.execute-api.${AWS::Region}.amazonaws.com/prod"
+  
+  SNSTopic:
+    Description: SNS Topic ARN
+    Value: !Ref LoanAlertsTopicV2
+  
+  SQSQueue:
+    Description: SQS Queue URL
+    Value: !Ref CalculationQueueV2
