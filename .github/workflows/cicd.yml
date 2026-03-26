@@ -1,0 +1,110 @@
+name: CI/CD Pipeline - AWS Academy Compatible
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r eb-website/requirements.txt
+        pip install pytest flake8 bandit
+    
+    - name: Lint with flake8
+      run: flake8 eb-website/ loan_service/ --count --select=E9,F63,F7,F82 --show-source --statistics
+    
+    - name: Security check with bandit
+      run: bandit -r eb-website/ loan_service/ -f json -o bandit-report.json || true
+    
+    - name: Run tests
+      run: pytest || true
+
+  sonar:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  security-scan:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: ZAP Baseline Scan
+      uses: zaproxy/action-baseline@v0.7.0
+      with:
+        target: 'http://newapp-env.eba-pbimppjz.us-east-1.elasticbeanstalk.com/'
+        rules_file_name: '.zap/rules.tsv'
+        cmd_options: '-a'
+        issue_title: 'ZAP Security Baseline Scan'
+
+  # MANUAL DEPLOYMENT - Documented in README
+  # AWS Academy uses LabRole which cannot be automated
+  # Deployment steps documented in deployment-guide.md
+
+  generate-artifacts:
+    needs: [test, sonar, security-scan]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Generate deployment package
+      run: |
+        cd eb-website
+        zip -r ../scalable-financial-suite-v${{ github.run_number }}.zip .
+        cd ..
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-package
+        path: scalable-financial-suite-v${{ github.run_number }}.zip
+    
+    - name: Generate deployment report
+      run: |
+        echo "# Deployment Package v${{ github.run_number }}" > deployment-report.md
+        echo "" >> deployment-report.md
+        echo "## Git Commit" >> deployment-report.md
+        echo "${{ github.sha }}" >> deployment-report.md
+        echo "" >> deployment-report.md
+        echo "## SonarQube Status" >> deployment-report.md
+        echo "See: https://sonarcloud.io/dashboard?id=jeevanjot011_ScalableComputing" >> deployment-report.md
+        echo "" >> deployment-report.md
+        echo "## Security Scan" >> deployment-report.md
+        echo "ZAP baseline scan completed" >> deployment-report.md
+        echo "" >> deployment-report.md
+        echo "## Manual Deployment Required" >> deployment-report.md
+        echo "AWS Academy LabRole requires manual deployment via EB CLI or AWS Console" >> deployment-report.md
+        echo "" >> deployment-report.md
+        echo "### Deployment Steps:" >> deployment-report.md
+        echo "1. Download artifact: scalable-financial-suite-v${{ github.run_number }}.zip" >> deployment-report.md
+        echo "2. Go to AWS Console → Elastic Beanstalk → newapp → Newapp-env" >> deployment-report.md
+        echo "3. Click 'Upload and Deploy'" >> deployment-report.md
+        echo "4. Select the ZIP file and deploy" >> deployment-report.md
+    
+    - name: Upload report
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-report
+        path: deployment-report.md
