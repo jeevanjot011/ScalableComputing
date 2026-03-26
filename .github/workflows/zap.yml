@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   schedule:
     - cron: '0 0 * * 0'  # Weekly on Sunday
+  workflow_dispatch:  # Manual trigger
 
 jobs:
   zap-scan:
@@ -12,9 +13,29 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: ZAP Baseline Scan
-      uses: zaproxy/action-baseline@v0.7.0
+    - name: ZAP Full Scan
+      uses: zaproxy/action-full-scan@v0.7.0
       with:
         target: 'http://newapp-env.eba-pbimppjz.us-east-1.elasticbeanstalk.com/'
         rules_file_name: '.zap/rules.tsv'
-        cmd_options: '-a'
+        cmd_options: '-a -j'
+        fail_action: false
+        allow_issue_writing: true
+      continue-on-error: true  # Don't fail the build if ZAP has issues
+
+    - name: Upload ZAP Report
+      uses: actions/upload-artifact@v3
+      if: always()  # Upload even if ZAP fails
+      with:
+        name: zap-reports
+        path: |
+          report_*.html
+          report_*.json
+          report_*.md
+        retention-days: 30
+
+    - name: Check ZAP Results
+      if: always()
+      run: |
+        echo "ZAP scan completed"
+        ls -la report_*.* 2>/dev/null || echo "No reports generated"

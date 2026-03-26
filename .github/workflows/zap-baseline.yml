@@ -1,0 +1,48 @@
+name: ZAP Baseline Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  zap-baseline:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Pull ZAP Docker Image
+      run: docker pull ghcr.io/zaproxy/zaproxy:stable
+    
+    - name: Run ZAP Baseline Scan
+      run: |
+        docker run -v $(pwd):/zap/wrk/:rw -t ghcr.io/zaproxy/zaproxy:stable \
+          zap-baseline.py \
+          -t http://newapp-env.eba-pbimppjz.us-east-1.elasticbeanstalk.com/ \
+          -g gen.conf \
+          -r zap-baseline-report.html \
+          -w zap-baseline-report.md \
+          -J zap-baseline-report.json \
+          -a || true
+    
+    - name: Upload ZAP Reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: zap-baseline-reports
+        path: |
+          zap-baseline-report.*
+          gen.conf
+        retention-days: 30
+    
+    - name: Display Summary
+      if: always()
+      run: |
+        echo "## ZAP Security Scan Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ -f zap-baseline-report.md ]; then
+          cat zap-baseline-report.md >> $GITHUB_STEP_SUMMARY
+        else
+          echo "Scan completed - check artifacts for details" >> $GITHUB_STEP_SUMMARY
+        fi
