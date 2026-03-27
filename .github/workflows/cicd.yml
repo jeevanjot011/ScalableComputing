@@ -61,7 +61,7 @@ jobs:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
     needs: ci_pipeline
-    continue-on-error: true  # Don't fail build if quality gate fails
+    continue-on-error: true  # Don't fail build
 
     steps:
     - name: Checkout code
@@ -69,16 +69,17 @@ jobs:
       with:
         fetch-depth: 0
 
-    # Use the exact working version from your other project
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8
       with:
         args: >
           -Dsonar.python.coverage.reportPaths=eb-website/coverage.xml
           -Dsonar.qualitygate.wait=false
+          -Dsonar.projectKey=ScalableComputing
+          -Dsonar.organization=jeevanjot011
       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: https://sonarcloud.io
 
   # ================== ZAP BASELINE SCAN ==================
   zap-scan:
@@ -135,22 +136,3 @@ jobs:
         name: deployment-package
         path: scalable-financial-suite-v${{ github.run_number }}.zip
         retention-days: 30
-
-    - name: Generate deployment report
-      run: |
-        echo "# Deployment Package v${{ github.run_number }}" > deployment-report.md
-        echo "" >> deployment-report.md
-        echo "## Git Commit" >> deployment-report.md
-        echo "${{ github.sha }}" >> deployment-report.md
-        echo "" >> deployment-report.md
-        echo "## CI/CD Status" >> deployment-report.md
-        echo "- ✅ Tests" >> deployment-report.md
-        echo "- ✅ Bandit Security Scan" >> deployment-report.md
-        echo "- ✅ ZAP Dynamic Security Scan" >> deployment-report.md
-        echo "- ✅ SonarCloud Analysis (Quality Gate: Reference Only)" >> deployment-report.md
-
-    - name: Upload deployment report
-      uses: actions/upload-artifact@v4
-      with:
-        name: deployment-report
-        path: deployment-report.md
