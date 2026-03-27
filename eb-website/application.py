@@ -625,4 +625,9 @@ def health():
     return {'status': 'healthy', 'service': 'scalable-financial-suite', 'version': '2.1.0'}
 
 if __name__ == '__main__':
-    application.run(debug=True)
+    application.run(debug=os.environ.get("FLASK_DEBUG", "False").lower() == "true")
+
+# Security fix: Debug mode controlled by environment variable
+if __name__ == '__main__':
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    application.run(debug=debug_mode)
