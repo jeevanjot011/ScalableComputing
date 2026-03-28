@@ -64,9 +64,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  
-      with:
-        args: >
-          -Dsonar.python.coverage.reportPaths=eb-website/coverage.xml    
+          args: >
+            -Dsonar.python.coverage.reportPaths=eb-website/coverage.xml    
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
