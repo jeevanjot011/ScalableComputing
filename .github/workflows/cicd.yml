@@ -69,22 +69,22 @@ jobs:
           fetch-depth: 0  
   
       # ✅ Download coverage file from CI job
-      -name: Download Coverage XML
-       uses: actions/download-artifact@v4
-       with:
+      - name: Download Coverage XML
+        uses: actions/download-artifact@v4
+        with:
          name: coverage-xml
          path: eb-website
   
       # ✅ Debug (optional)
-      -name: Verify coverage file
-       run: ls -la eb-website
+      - name: Verify coverage file
+        run: ls -la eb-website
   
       # ✅ Sonar scan with coverage
-      -name: SonarQube Scan
-       uses: SonarSource/sonarqube-scan-action@v6
-       env:
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-       with:
+        with:
          args: >
           -Dsonar.python.coverage.reportPaths=eb-website/coverage.xml
 
