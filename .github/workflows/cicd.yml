@@ -75,8 +75,10 @@ jobs:
         args: >
           -Dsonar.python.coverage.reportPaths=eb-website/coverage.xml
           -Dsonar.qualitygate.wait=false
-          -Dsonar.projectKey=ScalableComputing
+          -Dsonar.projectKey=jeevanjot011_ScalableComputing
+          -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.organization=jeevanjot011
+          -Dsonar.sources=.
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
