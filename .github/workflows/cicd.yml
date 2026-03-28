@@ -70,13 +70,9 @@ jobs:
         fetch-depth: 0
 
     - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8
-      with:
-        args: >
-          -Dsonar.python.coverage.reportPaths=eb-website/coverage.xml
-      env:
+        uses: SonarSource/sonarqube-scan-action@v2
+        env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ================== ZAP BASELINE SCAN ==================
   zap-scan:
