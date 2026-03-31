@@ -21,11 +21,12 @@ jobs:
     
     - name: Install dependencies
       run: |
-        pip install pytest pytest-cov boto3
+        pip install pytest pytest-cov boto3 botocore
     
     - name: Run tests with coverage
+      working-directory: ./loan_service
       run: |
-        pytest tests/ --cov=loan_service --cov-report=xml:coverage.xml
+        python -m pytest ../tests/ --cov=. --cov-report=xml:../coverage.xml
     
     - name: SonarQube Scan
       uses: SonarSource/sonarqube-scan-action@master

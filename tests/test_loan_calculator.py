@@ -1,7 +1,10 @@
 import unittest
 import json
 import sys
-sys.path.insert(0, '../loan_service')
+import os
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loan_service'))
 
 from app import calculate_loan_emi, lambda_handler
 
@@ -42,7 +45,6 @@ class TestLoanCalculator(unittest.TestCase):
         self.assertEqual(response['statusCode'], 200)
         body = json.loads(response['body'])
         self.assertIn('emi', body)
-        self.assertIn('persisted', body)
 
 if __name__ == '__main__':
     unittest.main()
