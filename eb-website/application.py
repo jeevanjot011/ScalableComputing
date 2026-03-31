@@ -10,16 +10,19 @@ EXCHANGE_KEY = '95edf59d41cc15cdd983df04'
 
 @application.after_request
 def add_security_headers(response):
-    # Fix: Content Security Policy (CSP) Header Not Set
-    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com;"
+    # Fix CSP - must include connect-src for API calls
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
+        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
+        "font-src 'self' https://cdnjs.cloudflare.com; "
+        "connect-src 'self' https://v6.exchangerate-api.com https://v68fi30gr9.execute-api.us-east-1.amazonaws.com https://dx9lk0qa66.execute-api.us-east-1.amazonaws.com;"
+        "frame-ancestors 'self'; "
+        "form-action 'self';" 
+    )
     
-    # Fix: Missing Anti-clickjacking Header (X-Frame-Options)
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-    
-    # Fix: X-Content-Type-Options Header Missing
     response.headers['X-Content-Type-Options'] = 'nosniff'
-    
-    # Additional security headers
     response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     response.headers['X-XSS-Protection'] = '1; mode=block'
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
