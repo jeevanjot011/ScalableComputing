@@ -1,10 +1,30 @@
 from flask import Flask, render_template_string
-
+from functools import wraps
 application = Flask(__name__)
 
-LOAN_API = 'https://4ut89f1hia.execute-api.us-east-1.amazonaws.com/prod'
+LOAN_API = 'https://v68fi30gr9.execute-api.us-east-1.amazonaws.com/prod'
 INSURANCE_API = 'https://dx9lk0qa66.execute-api.us-east-1.amazonaws.com/prod'
 EXCHANGE_KEY = '95edf59d41cc15cdd983df04'
+
+
+
+@application.after_request
+def add_security_headers(response):
+    # Fix: Content Security Policy (CSP) Header Not Set
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com;"
+    
+    # Fix: Missing Anti-clickjacking Header (X-Frame-Options)
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    
+    # Fix: X-Content-Type-Options Header Missing
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    
+    # Additional security headers
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    
+    return response
 
 def get_base_template(active_page):
     nav_currency = 'active' if active_page == 'currency' else ''
@@ -19,7 +39,11 @@ def get_base_template(active_page):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>''' + active_page.title() + ''' - ScalableFin</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
+      rel="stylesheet" 
+      integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" 
+      crossorigin="anonymous" 
+      referrerpolicy="no-referrer">
     <style>
         :root {
             --silver-dark: #1a1a1f;
@@ -420,7 +444,7 @@ def loan():
 </div>
 '''
     js = '''
-const LOAN_API = 'https://4ut89f1hia.execute-api.us-east-1.amazonaws.com/prod';
+const LOAN_API = 'https://v68fi30gr9.execute-api.us-east-1.amazonaws.com/prod';
 document.getElementById('loanForm').onsubmit = async (e) => {
     e.preventDefault();
     const btn = e.target.querySelector('button');

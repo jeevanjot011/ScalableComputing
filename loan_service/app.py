@@ -6,15 +6,23 @@ import logging
 import time
 from datetime import datetime
 from decimal import Decimal
+from botocore.config import Config
 
 # Setup logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# Initialize AWS clients
-dynamodb = boto3.resource('dynamodb')
-sns = boto3.client('sns')
-sqs = boto3.client('sqs')
+# Configure boto3 with timeouts (SonarQube fix)
+boto_config = Config(
+    connect_timeout=5,  # seconds
+    read_timeout=10,    # seconds
+    retries={'max_attempts': 3}
+)
+
+# Initialize AWS clients with timeout config
+dynamodb = boto3.resource('dynamodb', config=boto_config)
+sns = boto3.client('sns', config=boto_config)
+sqs = boto3.client('sqs', config=boto_config)
 
 # Get environment variables
 TABLE_NAME = os.environ.get('TABLE_NAME', 'ScalableG1')

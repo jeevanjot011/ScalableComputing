@@ -1,4 +1,5 @@
 version = 0.1
+
 [default.deploy.parameters]
 stack_name = "scalable-v2"
 s3_bucket = "scalable-sam-bucket-183907372384"
@@ -7,5 +8,6 @@ confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 disable_rollback = false
 resolve_s3 = false
+
 [default.global.parameters]
 region = "us-east-1"
