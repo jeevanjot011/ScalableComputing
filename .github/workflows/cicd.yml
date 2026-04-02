@@ -100,23 +100,20 @@ zap-scan:
 
   - name: Run ZAP Baseline Scan
     uses: zaproxy/action-baseline@v0.7.0
+    env:
+      GITHUB_TOKEN: ""  # Empty token prevents issue creation
     with:
       target: "http://newapp-env.eba-pbimppjz.us-east-1.elasticbeanstalk.com/"
       rules_file_name: '.zap/rules.tsv'
       fail_action: false
       cmd_options: '-a'
-      # NO 'token' input = NO GitHub issue creation
-      # NO 'allow_issue_writing' input (not valid)
 
   - name: Upload ZAP Reports
     uses: actions/upload-artifact@v4
-    if: always()  # Upload even if scan fails
+    if: always()
     with:
       name: zap-report
-      path: |
-        report_*.html
-        report_*.md
-        report_*.json
+      path: report_*
     # ==========================================
   # JOB 4: Deploy Frontend (Elastic Beanstalk)
   # ==========================================
