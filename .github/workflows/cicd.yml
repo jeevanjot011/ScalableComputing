@@ -1,8 +1,11 @@
 name: CI/CD Pipeline
 
 permissions:
-  issues: write
   contents: read
+  issues: write        # Add this
+  actions: read
+  checks: write        # Add this
+  pull-requests: write 
 
 on:
   push:
