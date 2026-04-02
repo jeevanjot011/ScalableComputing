@@ -93,7 +93,7 @@ def send_sns_notification(calculation_id, data):
     try:
         if SNS_TOPIC_ARN and float(data['input']['principal']) > 1000000:
             message = f"Large loan calculation: ₹{data['input']['principal']}\n"
-            message += f"EMI: ₹{float(data['emi']):.2f}/month for {data['input']['years']} years\n"
+            message += f"EMI: €{float(data['emi']):.2f}/month for {data['input']['years']} years\n"
             message += f"Calculation ID: {calculation_id}"
             
             sns.publish(
